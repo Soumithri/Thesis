@@ -1,0 +1,10 @@
+py3
+py2
+modules
+.vscode
+models
+output*
+db_config.json
+Twitter-keys.txt
+mongodb
+nohup.out
