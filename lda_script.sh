@@ -1,0 +1,1 @@
+nohup python server/get_retweets.pynohup python -u server/lda_gensim.py -c './models/tweets.mm' -d './models/tweets.dict' -cs 2000 -k "20 101 20"  -p 40 -i 400 -o './models/train2' > exp3.txt &

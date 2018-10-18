@@ -18,15 +18,15 @@ cursor2 = MongoConnector(config1).__connect__()
 coll = config1['MONGO_COLL']
 
 ##########   TWITTER API ACCESS KEYS AND TOKENS #############
-ACCESS_TOKEN_fol = "849296079279591424-vCpBdrrmSTld2LoUbxHwUVtV6BgnZk2"
-ACCESS_TOKEN_SECRET_fol = "nMHdUzXQ4XE7TYD6SLmGorMsTF45EIzezzTudwFzjuGL0"
-CONSUMER_KEY_fol = "6g1gYk1Fq0js5oApBCYv4UUmm"
-CONSUMER_SECRET_fol = "1XNmFL7NwkFhciyOtnyXBIe3Fdty8FK4FmUiioAggqxFLhXNQ3"
+ACCESS_TOKEN_fol = "****"
+ACCESS_TOKEN_SECRET_fol = "****"
+CONSUMER_KEY_fol = "****"
+CONSUMER_SECRET_fol = "****"
 
-ACCESS_TOKEN_fr = "835305759734837249-KkeNBDmOsrZ26eSGMhl64D2y90k8VWl"
-ACCESS_TOKEN_SECRET_fr = "US0AmH5VGEM6702lLiv2XSY17X6LgWso34Frvwjo0G6Ik"
-CONSUMER_KEY_fr = "wDO81dOccJlOoH2oWdKm93oIl"
-CONSUMER_SECRET_fr = "0ilDay6vQt97xfQCzzWQSqv9gySJ0tr5IQ7RrdMRn3Mr5cwOl7"
+ACCESS_TOKEN_fr = "****"
+ACCESS_TOKEN_SECRET_fr = "****"
+CONSUMER_KEY_fr = "****"
+CONSUMER_SECRET_fr = "****"
 
 #############################################################
 
