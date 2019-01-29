@@ -24,7 +24,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 from gensim import corpora, models
-from gensim.models.ldamodel import LdaModel
+from gensim.models.ldamulticore import LdaMulticore
 from gensim.models.coherencemodel import CoherenceModel
 from sklearn.model_selection import train_test_split
 from timeit import default_timer
@@ -33,7 +33,8 @@ from timeit import default_timer
 # %matplotlib inline
 
 # Output Directories to save
-OUTPUT_DIR = './models'
+OUTPUT_DIR = '././models'
+SAVE_DIR = OUTPUT_DIR+'/df_60_p20_i50'
 
 def create_Directories(path):
   ''' Checks for the directory. If not present creates the directory'''
@@ -55,21 +56,10 @@ def get_data():
   with open('././output/preprocessed_tweets_with_userid.csv', 'r') as infile:
     df = pd.read_csv(infile, names=['userid', 'tweets'], delimiter='|')
     df['tweets'] = df.tweets.str.replace(r'\W+',' ')
-    
-
-
-  """> ### <font color=green>2.2 Convert the tweet_doc into tweet_tokens</font>"""
-
-  # Convert the tweet_doc into tweet_tokens and remove non_alphanumeric strings in the tokens
-
-  df['tweet_doc'] = df['tweets'].apply(lambda x: x.split())
-  #logging.info('Length of total dataset: {}'.format(len(df)))
-
-
-  """> ### <font color=green>2.3. Split the data set into 4 sets - 20%, 40%, 60%, 80%</font>"""
-
-  df_80, df_20 = train_test_split(df, test_size=0.2)
-  df_60, df_40 = train_test_split(df, test_size=0.4)
+    df['tweet_tokens'] = df['tweets'].apply(lambda x: x.split())
+    #logging.info('Length of total dataset: {}'.format(len(df)))
+    df_80, df_20 = train_test_split(df, test_size=0.2)
+    df_60, df_40 = train_test_split(df, test_size=0.4)
 
   return (df_20, df_40, df_60, df_80)
 
@@ -97,36 +87,60 @@ def create_dict_corpus(doc_list, fname, OUTPUT_DIR=OUTPUT_DIR):
 > ### <font color=green>3.1. Define LDA Multicore on the corpus</font>
 """
 
-def run_lda(corpus, dictionary, start_topic=10, end_topic=100, step_size_of_topic=10, passes=1, iterations=50):
+def run_lda(corpus, dictionary, texts, start_topic=10, end_topic=100, step_size_of_topic=10, passes=1, iterations=50):
   lda_model = dict()
-  coh_model = dict()
-  eval_frame = pd.DataFrame(columns=['Number of Topics','Log_Perplexity_Pass_{0}_Iter_{1}'.format(passes, iterations), 
-                                     'Topic_Coherence_Pass_{0}_Iter_{1}'.format(passes, iterations)])
+  coh_model_umass = dict()
+  coh_model_uci = dict()
+  coh_model_ucv = dict()
+  coh_model_npmi = dict()
+  eval_frame = pd.DataFrame(columns=['Num_Topics','Log_Perplexity_P_{0}_I_{1}'.format(passes, iterations), 
+                                     'Topic_Coherence(u_mass)_P_{0}_I_{1}'.format(passes, iterations),
+                                     'Topic_Coherence(c_uci)_P_{0}_I_{1}'.format(passes, iterations),
+                                     'Topic_Coherence(c_v)_P_{0}_I_{1}'.format(passes, iterations),
+                                     'Topic_Coherence(c_npmi)_P_{0}_I_{1}'.format(passes, iterations)])
   logging.debug('******* RUNNING LDA *************')
   for i in range(start_topic, end_topic+1, step_size_of_topic):
-    lda_model[i] = LdaModel(corpus=corpus, id2word=dictionary, num_topics=i, passes=passes, iterations=iterations, chunksize=2500)
-    coh_model[i] = CoherenceModel(model=lda_model[i], corpus=corpus, dictionary=dictionary, coherence='u_mass')
-    eval_frame.loc[len(eval_frame)] = [i, lda_model[i].log_perplexity(corpus), coh_model[i].get_coherence()]
-  models = namedtuple('models',['lda_models', 'coh_models', 'eval_frame'])
-  return models(lda_model, coh_model, eval_frame)
+    print('Running LDA for the number of topics: {}'.format(i))
+    lda_model[i] = LdaMulticore(corpus=corpus, id2word=dictionary, num_topics=i, passes=passes, iterations=iterations, chunksize=2500)
+    coh_model_umass[i] = CoherenceModel(model=lda_model[i], corpus=corpus, dictionary=dictionary, coherence='u_mass')
+    coh_model_uci[i] = CoherenceModel(model=lda_model[i], texts=texts, coherence='c_uci')
+    coh_model_ucv[i] = CoherenceModel(model=lda_model[i], texts=texts, coherence='c_v')
+    coh_model_npmi[i] = CoherenceModel(model=lda_model[i], texts=texts, coherence='c_npmi')
+    eval_frame.loc[len(eval_frame)] = [i, lda_model[i].log_perplexity(corpus), coh_model_umass[i].get_coherence(), 
+                                       coh_model_uci[i].get_coherence(), coh_model_ucv[i].get_coherence(),coh_model_npmi[i].get_coherence()]
+  models = namedtuple('models',['lda_models', 'eval_frame'])
+  return models(lda_model, eval_frame)
    
-def save_model(*lda_model, DIR):
-  #create_Directories(DIR)
-  print(*lda_model)
-  for num_topics, model in dict(*lda_model).items():
-    print(num_topics, model)
+def save_model(DIR, lda_model):
+  for num_topics, model in dict(lda_model).items():
+    print("Saving LDA model with number of topics: {}".format(num_topics))
     model.save(DIR+'/'+str(num_topics)+'.lda', separately=False)
 
 """> ### <font color=green>3.2. Run the LDA  & topic coherence model</font>"""
 
-def main(dictionary, corpus):
+def main(dictionary, corpus, texts, SAVE_DIR=SAVE_DIR):
+  #start logging to a file
+  log_file = SAVE_DIR+'/lda_time.log'
+  start_time = default_timer()
   print('Enter the LDA parameters...\n')
-  start_topic, end_topic, step_size_of_topic, passes, iterations = map(int, input('Start Topic, End_topic, step_size, passes, iterations : ').split())
-  prompt = str(input('Do you wish to run LDA (y/n)? : ')).lower()
+  start_topic, end_topic, step_size_of_topic, passes, iterations = map(int, 
+                                                                       raw_input('Start Topic, End_topic, step_size, passes, iterations : ').split(','))
+  prompt = str(raw_input('Do you wish to run LDA (y/n)? : ')).lower()
   if prompt=='y':
     logging.debug('Running LDA and Topic Coherence ...\n')
-    models = run_lda(corpus=corpus, dictionary=dictionary, start_topic=start_topic, end_topic=end_topic, 
-                     step_size_of_topic=step_size_of_topic, passes=passes, iterations=iterations) 
+    models = run_lda(corpus=corpus, dictionary=dictionary, texts=texts, start_topic=start_topic, end_topic=end_topic, 
+                     step_size_of_topic=step_size_of_topic, passes=passes, iterations=iterations)
+    end_time = default_timer()
+    with open(log_file,'w') as f:
+      f.write("############ PROGRAM EXECUTION SUMMARY ###########\n")
+      f.write("----> Program start time: {0}\n".format(start_time))
+      f.write("----> Program end time: {0}\n".format(end_time))
+      f.write("----> Total program time taken in secs: {0} hrs\n".format((end_time-start_time)/(60*60)))
+      f.write("################################\n\n")
+      f.write("---------------- PROGRAM ENDED ----------------------")
+    
+    #save the models
+    save_model(lda_model=models.lda_models, DIR=SAVE_DIR)
   return models
 
 """> ### <font color=green>3.3. Define the plot function</font>"""
@@ -151,21 +165,21 @@ def plot(df, x1, x2, y1, y2, title1, title2, save=False, figsize=(20,5), OUTPUT_
 
 if __name__=='__main__':
 
-  SAVE_DIR = OUTPUT_DIR+'/df_20_p30_iter_50'
+  SAVE_DIR = OUTPUT_DIR+'/df_60_p20_i50'
   log_file = SAVE_DIR + '/lda_gensim.log'
   create_Directories(SAVE_DIR)
-  logging.basicConfig(filename=log_file, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+  logging.basicConfig(filename=log_file, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
   logging.debug('************* STARTING PROGRAM **************')
   (df_20, df_40, df_60, df_80) = get_data()
   start_time = default_timer()
-  (dictionary, corpus) = create_dict_corpus(list(df_20['tweet_doc']), 'data_20', OUTPUT_DIR=SAVE_DIR)
-  models = main(dictionary, corpus)
-  df_20_p_30_i_50 = models.eval_frame
+  (dictionary, corpus) = create_dict_corpus(list(df_60['tweet_tokens']), 'data_60', OUTPUT_DIR=SAVE_DIR)
+  models = main(dictionary=dictionary, corpus=corpus, SAVE_DIR=SAVE_DIR, texts=list(df_60['tweet_tokens']))
+  df_60_p20_i50 = models.eval_frame
   #print(df_20_p_20_i_50)
-  df_20_p_30_i_50.to_csv(SAVE_DIR+'/values.csv', index=False)
-  plot(df_20_p_30_i_50, x1='Number of Topics', y1='Log_Perplexity_Pass_30_Iter_50', x2='Number of Topics', y2='Topic_Coherence_Pass_30_Iter_50', 
-      title1='Number of Topics(K) Vs Log Perplexity', title2='Number of Topics(K) Vs Topic Coherence', OUTPUT_DIR=SAVE_DIR, save=True)
-  save_model(models.lda_models, DIR=SAVE_DIR)
+  df_60_p20_i50.to_csv(SAVE_DIR+'/values.csv', index=False)
+  # plot(df_60_p20_i50, x1='Number of Topics', y1='Log_Perplexity_Pass_30_Iter_50', x2='Number of Topics', y2='Topic_Coherence_Pass_30_Iter_50', 
+  #     title1='Number of Topics(K) Vs Log Perplexity', title2='Number of Topics(K) Vs Topic Coherence', OUTPUT_DIR=SAVE_DIR, save=True)
+  # save_model(models.lda_models, DIR=SAVE_DIR)
   end_time = default_timer()
   logging.debug("----> Total program time taken in secs: {0}".format(end_time - start_time))
   # num_topics = int(input('Pick a value of number of topics - [10,20,30,40,50,60,70,80,90,100]: '))

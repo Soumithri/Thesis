@@ -106,7 +106,6 @@ venv.bak/
 # Folders
 py3
 py2
-modules
 .vscode
 models
 output*
@@ -114,7 +113,6 @@ mongodb
 Gephi
 
 # Files
-db_config.json
 Twitter-keys.txt
 nohup.out
 
