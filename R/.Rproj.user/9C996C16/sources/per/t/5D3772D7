@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1552631728038.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5D3772D7",
+    "lastKnownWriteTime" : 8070450532247928838,
+    "last_content_update" : 1552631728038,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "id" : "6333abf2e70947768fde885f417456ec",
+        "name" : "karate",
+        "title" : "karate"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "object_explorer"
+}

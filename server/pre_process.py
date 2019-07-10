@@ -14,9 +14,10 @@ from nltk.stem import WordNetLemmatizer
 from MongoConnector import MongoConnector
 from PyContract import PyContract
 
-OUTPUT_DIRECTORY = './output_final'
-config = {  'MONGO_COLL': 'raw1Corpus',
-            'MONGO_DB': 'tweetCorpus',
+OUTPUT_DIRECTORY = './output'
+TV_SHOW = 'SelfieABC'
+config = {  'MONGO_COLL': TV_SHOW,
+            'MONGO_DB': 'swati_dataset',
             'MONGO_HOST': 'localhost',
             'MONGO_PORT': 27017}
 
@@ -32,11 +33,11 @@ contracter = PyContract()
 tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
 lemmatizer = WordNetLemmatizer()
 
-log_file = OUTPUT_DIRECTORY+"/pre_processing_log.log"
+log_file = OUTPUT_DIRECTORY+'/'+TV_SHOW+'_pre_processing_log.log'
 # Start logging
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-def get_Tweets(user:str) -> dict:
+def get_Tweets(user:str) -> list:
     '''
         This function takes the config file and connects to MongoDB collection.
         Retrieves the tweet list from the user id and returns a dict object
@@ -46,11 +47,12 @@ def get_Tweets(user:str) -> dict:
     # Create new mongo collection and cursor object to store the unprocessed raw feature corpus
     cursor = dbconnector.__connect__()
     # Collect all the user tweets as one document and store it in a list
-    que = cursor.find({'doc.user_info.id_str': user}, {"doc.tweets": 1})
+    que = cursor.find({'user.id_str':user, 'lang':'en'}, {'_id':0, 'text':1})
+    if que.count() < 10:
+        return None
     tweet_list = list()
-    for i in que:
-        for test in i['doc']['tweets']:
-            tweet_list.append(contracter.__translate__(test['text']))
+    for tweet in que:
+        tweet_list.append(contracter.__translate__(tweet['text']))
     return tweet_list
 
 def preprocess_Tweets(tweet_list:list) -> list:
@@ -105,30 +107,37 @@ def get_wordnet_pos(treebank_tag):
     else:
         return None
 
+def get_users():
+    cursor = dbconnector.__connect__()
+    # Collect all the user tweets as one document and store it in a list
+    que = cursor.distinct('user.id_str')
+    unique_users_list = list(que)
+    return unique_users_list
+    
+    
 def ensure_directory():
     if not os.path.exists(OUTPUT_DIRECTORY):
         os.makedirs(OUTPUT_DIRECTORY)
 
 ############    MAIN  PROGRAM STARTS HERE  #########
-
+    
 if __name__ == '__main__':
 
     # Start the timer
     start_time = timeit.default_timer()
     logging.debug("---------------- PROGRAM STARTING ----------------------\n")
     # Make sure directory is present. If not create the directory - 'output'
-    with codecs.open(OUTPUT_DIRECTORY+"/raw_tweets_with_userid.csv", 'w','utf-8') as raw_u_file, \
-           codecs.open(OUTPUT_DIRECTORY+"/preprocessed_tweets_corpora", 'w','utf-8') as preproc_file, \
-             codecs.open(OUTPUT_DIRECTORY+"/preprocessed_tweets_with_userid.csv", 'w','utf-8') as preproc_u_file, \
-               codecs.open(OUTPUT_DIRECTORY+"/preprocessed_tweets_1by1__with_userid", 'w','utf-8') as preproc_line_file:
+    with codecs.open(OUTPUT_DIRECTORY+'/'+TV_SHOW+"_raw_tweets_with_userid.csv", 'w','utf-8') as raw_u_file, \
+           codecs.open(OUTPUT_DIRECTORY+'/'+TV_SHOW+"_preprocessed_tweets_corpora.csv", 'w','utf-8') as preproc_file, \
+             codecs.open(OUTPUT_DIRECTORY+'/'+TV_SHOW+"_preprocessed_tweets_with_userid.csv", 'w','utf-8') as preproc_u_file, \
+               codecs.open(OUTPUT_DIRECTORY+'/'+TV_SHOW+"_preprocessed_tweets_1by1__with_userid.csv", 'w','utf-8') as preproc_line_file, \
+                 codecs.open(OUTPUT_DIRECTORY+'/'+TV_SHOW+"_discarded_users_list.csv", 'w','utf-8') as discarded_users_file:
 
         # Load the unique users from the file into a list given by unique_users_list
         logging.debug("Importing the unique users list.....")
-        unique_users_list = list()
-        with open(OUTPUT_DIRECTORY+"/final_unique_users.txt",'r', encoding='utf-8') as outfile:
-            unique_users_list = outfile.read().splitlines()
+        unique_users_list = get_users()
+        discarded_users_list = list()
         logging.debug("Successfully imported {0} unique users....\n".format(len(unique_users_list)))
-
         logging.debug("---------------- STARTING PRE-PROCESSING ----------------------\n\n")
         # Get tweets for each unique user
         counter = 1
@@ -139,6 +148,12 @@ if __name__ == '__main__':
             logging.debug("{0}. Ready to process the tweets for userid: {1}".format(counter, user))
             logging.debug("----> Collecting tweets...")
             tweet_list = get_Tweets(user)
+            if tweet_list is None:
+                print("{0}".format(user), file=discarded_users_file)
+                logging.debug("Discarded userid : {}\n".format(user))
+                discarded_users_list.append(user)
+                counter+=1
+                continue
             logging.debug("----> Collected tweets: {0}...".format(len(tweet_list)))
             logging.debug("----> Pre-processing... ")
             processed_tweet_list = preprocess_Tweets(tweet_list)
@@ -157,26 +172,30 @@ if __name__ == '__main__':
             logging.debug("----> No. of tweets before pre-processing: {0}".format(len(tweet_list)))
             logging.debug("----> No. of tweets after pre-processing: {0}".format(len(processed_tweet_list)))
             logging.debug("----> No. of tweets discarded: {0}".format(len(tweet_list)-len(processed_tweet_list)))
-            logging.debug("----> Total time taken: {0}".format(user_end_time-user_start_time))
+            logging.debug("----> Total time taken: {0} secs".format(user_end_time-user_start_time))
             logging.debug("################################\n")   
             total_tweets += len(tweet_list)
             total_pre_processed_tweets += len(processed_tweet_list)
             print('{0}. Pre-processed tweets for userid: {1}'.format(counter, user))
             counter+=1
+            if counter%50==0:
+                logging.debug('\n#######################')
+                logging.debug('Processed {0} users out of {1}###########################\n'.format(counter, 
+                                len(unique_users_list)-counter))
      # Print the time taken     
     end_time = timeit.default_timer()
     logging.debug("---------------- PRE-PROCESSING COMPLETED----------------------\n\n")
     logging.debug("############ PROGRAM SUMMARY ###########")
-    logging.debug("----> No. of unique users: {0}".format("2207"))
-    logging.debug("----> No. of discarded users: {0}".format("40"))
+    logging.debug("----> No. of unique users: {0}".format(len(unique_users_list)))
+    logging.debug("----> No. of discarded users: {0}".format(len(discarded_users_list)))
     logging.debug("----> No. of pre-processed users: {0}".format(len(unique_users_list)))
     logging.debug("----> No. of tweets before pre-processing: {0}".format(total_tweets))
-    logging.debug("----> No. of tweets before pre-processing: {0}".format(total_pre_processed_tweets))
+    logging.debug("----> No. of tweets after pre-processing: {0}".format(total_pre_processed_tweets))
     logging.debug("----> No. of discarded tweets for pre-processing (not including discared users): \
-                                                {0}".format(total_tweets - total_pre_processed_tweets))
+                                                {0}".format(total_tweets-total_pre_processed_tweets))
     logging.debug("----> Program start time: {0}".format(start_time))
     logging.debug("----> Program end time: {0}".format(end_time))
-    logging.debug("----> Total program time taken: {0}".format(end_time - start_time))
+    logging.debug("----> Total program time taken: {0} mins".format((end_time-start_time)/60))
     logging.debug("################################\n\n")
     logging.debug("---------------- PROGRAM ENDED ----------------------")
 ###########     MAIN  PROGRAM ENDS HERE    ##########ß

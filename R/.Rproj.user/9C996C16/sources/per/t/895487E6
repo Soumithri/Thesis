@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1551941584698.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2323076349",
+    "id" : "895487E6",
+    "lastKnownWriteTime" : 1555130872,
+    "last_content_update" : 1555130872773,
+    "path" : "~/Desktop/Projects/R/CommunityDetection.Rmd",
+    "project_path" : "CommunityDetection.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "232,17",
+        "scrollLine" : "224",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

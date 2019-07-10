@@ -116,3 +116,12 @@ Gephi
 Twitter-keys.txt
 nohup.out
 
+# Folders
+Images/*
+.idea/
+papers/
+
+# R
+R/.Rproj.user/*
+.Rdata
+.Rhistory

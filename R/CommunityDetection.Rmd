@@ -1,0 +1,240 @@
+---
+title: "Community Detection"
+output: html_notebook
+---
+
+Import the graph library and read the graph into igraph
+```{r}
+library('igraph')
+library('igraphdata')
+library(networkD3)
+library(c2c)
+```
+
+Load the GraphML file as an IGRAPH
+```{r}
+G = read.graph('StrangerThings.graphml', format='graphml')
+cat('Number of nodes in graph: ', length(V(G)),'\n')
+cat('Number of edges in graph: ', length(E(G)))
+```
+
+Remove the self-loops in the network
+```{r}
+G = simplify(G, remove.loops = TRUE, remove.multiple = FALSE)
+cat('Number of nodes in graph: ', length(V(G)),'\n')
+cat('Number of edges in graph: ', length(E(G)))
+```
+
+Remove the nodes which do not have edges in the network
+```{r}
+Isolated = which(degree(G)==0)
+G2 = delete.vertices(G, Isolated)
+cat('Number of nodes in graph: ', length(V(G2)),'\n')
+cat('Number of edges in graph: ', length(E(G2)))
+```
+
+Plot the graph
+```{r}
+V(G2)$degree = degree(G2, normalized = FALSE)
+L = layout_with_fr(G2)
+plot(G2, layout=layout.fruchterman.reingold, rescale=T, edge.arrow.size=.1, vertex.color="red", vertex.label.color=NA, vertex.label.dist=NA, asp = 0, vertex.size = 2, vertex.label.cex = 0.8)
+```
+
+Apply Girvan-Newman Algorithm
+
+ 1) Convert the directed graph to undirected graph
+```{r}
+G2.sym = as.undirected(G2, mode= "collapse", edge.attr.comb=list(weight="sum", "ignore"))
+```
+
+ 2) Compute the edge betweenness for each edge in network
+ 3) Remove the edge with the highest betweenness.
+ 4) Recalculate the edge betweennessfor all edges effected by the removal
+ 5) Repeat from step 2 until no edges remain
+```{r}
+comm <- cluster_edge_betweenness(G2.sym, weights=NULL, directed=T) 
+cat('Number of identified communities: ', length(comm))
+```
+
+Plot the dendrogram 
+```{r}
+dendPlot(comm, mode="hclust", ann=F, xlab=F, ylab=F)
+```
+
+Plot the network by grouping the grouping the nodes into their respective communities
+```{r}
+plot(comm, G2, layout=layout.fruchterman.reingold, rescale=T, edge.arrow.size=.1, vertex.label.color=NA, vertex.label.dist=NA, asp = -20, vertex.size = 2, vertex.label.cex = 0.8) 
+```
+
+
+
+
+
+```{r}
+members = membership(comm)
+G2.d3 = igraph_to_networkD3(G2, group = members)
+# Create force directed network plot
+forceNetwork(Links = G2.d3$links, Nodes = G2.d3$nodes, Source = 'source', Target = 'target', NodeID = 'name', Group = 'group',linkColour = "#afafaf", fontSize=12, zoom=T, legend=T,Nodesize=1, opacity = 0.8, charge=-300, width = 1000, height = 1000)
+```
+Evaluation metrics using Zachary's Karate Club:
+
+
+1) Define functions
+
+```{r}
+#### FUNCTIONS ###################
+
+GirvanNewman <- function(G) {
+  #G = as.undirected(G2, mode= "collapse", edge.attr.comb=list(weight="sum", "ignore"))
+  community <- cluster_fast_greedy(G, weights=NULL)
+  cat('Number of identified communities: ', length(community))
+  return (community)
+}
+
+Walktrap <- function(G) {
+  community <- walktrap.community(G, weights = NULL, steps = 4, merges = TRUE, modularity = TRUE, membership = TRUE )
+  cat('Number of identified communities: ', length(community))
+  return (community)
+}
+
+LeadingEigen <- function(G) {
+  community <- leading.eigenvector.community(G, weights = NULL, steps = vcount(G))
+  cat('Number of identified communities: ', length(community))
+  return (community)
+}
+
+Infomap <- function(G) {
+  community <- cluster_infomap(G, e.weights = NULL, v.weights = NULL,
+  modularity = TRUE )
+  cat('Number of identified communities: ', length(community))
+  return (community)
+}
+
+plotGraph <- function(G, community, num_clusters) {
+  community.groups <- cutat(community, num_clusters)
+  #community.subtree <- cutree()
+dendPlot(community, mode="hclust", ann=F, xlab=F, ylab=F)
+  plot(structure(list(membership=community.groups), class="communities"), G, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)
+}
+
+dynamicGraph <- function(G, community){
+  members <- membership(comm)
+  G.d3 <- igraph_to_networkD3(G2, group = members)
+# Create force directed network plot
+forceNetwork(Links = G.d3$links, Nodes = G.d3$nodes, Source = 'source', Target = 'target', NodeID = 'name', Group = 'group',linkColour = "#afafaf", fontSize=12, zoom=T, legend=T,Nodesize=1, opacity = 0.8, charge=-300, width = 1000, height = 1000)
+}
+```
+
+```{r}
+##### EVAlUATION METRICS #######
+
+evaluate_graph <- function(G, V_attr, community, num_comm){
+  confusion_matrix <- table(cutat(community, num_comm), vertex_attr(G, V_attr))
+  print(confusion_matrix)
+  accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix)
+  cat('Accuracy : ', accuracy)
+  modularity <- igraph::modularity(community, membership=cutat(community, num_clusters))
+  
+  cat('Modularity ', modularity)
+}
+  
+##################################
+```
+
+2) Plot the Zachary Karate Club
+
+```{r}
+#karate = make_graph('Zachary')
+data(karate)
+summary(karate)
+par(mar=c(0,0,0,0))
+plot(karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)
+```
+
+3) Apply CD algorithms to Zachary Karate Club and plot dendrograms and community structure
+
+```{r}
+Num_clusters <- 2
+comm_karate = GirvanNewman(karate)
+comm_walk_karate = Walktrap(karate)
+comm_eigen_karate = LeadingEigen(karate)
+comm_infomap_karate = Infomap(karate)
+par(mfrow=c(1,1))
+plotGraph(karate, comm_karate, Num_clusters)
+plotGraph(karate, comm_walk_karate, Num_clusters)
+plotGraph(karate, comm_eigen_karate, Num_clusters)
+#plotGraph(karate, comm_infomap_karate, Num_clusters)
+plot(comm_infomap_karate, karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)
+```
+
+Plot the dynamic visualization
+
+```{r}
+dynamicGraph(G, comm_karate)
+```
+
+Get the Confusion Matrix for GirvanNewman
+Cited Papers:
+http://www.arxiv.org/abs/cond-mat/0408187
+
+```{r}
+evaluate_graph(karate, community = comm_karate, V_attr = 'Faction', num_comm = Num_clusters)
+```
+
+Get the Confusion Matrix for RandomWalk (WalkTrap)
+Cited papers:
+http://arxiv.org/abs/physics/0512106
+
+```{r}
+evaluate_graph(karate, community = comm_walk_karate, V_attr = 'Faction', num_comm = Num_clusters)
+```
+
+Get the Confusion Matrix for Leading Eigenvector of modularity matrix 
+cited paper:
+htpp://arXiv:physics/0605087
+
+```{r}
+evaluate_graph(karate, community = comm_eigen_karate, V_attr = 'Faction', num_comm = Num_clusters)
+```
+
+Get the Confusion Matrix for Infomap:
+cited papers: http://dx.doi.org/10.1073/pnas.0706851105, http://arxiv.org/abs/0707.0609
+
+```{r}
+evaluate_graph(karate, community = comm_infomap_karate, V_attr = 'Faction', num_comm = Num_clusters)
+```
+
+```{r}
+dolphin = read.graph(file="http://users.dimi.uniud.it/~massimo.franceschet/teaching/datascience/network/R/dolphin.gml", format="gml")
+
+summary(dolphin)
+vcount(dolphin)
+ecount(dolphin)
+V(g)
+coords = layout.fruchterman.reingold(dolphin)
+plot(dolphin, layout=coords, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0.5, vertex.size = 12, vertex.label.cex = 0.2)
+```
+
+```{r}
+male = V(dolphin)$sex == "M"
+female = V(dolphin)$sex == "F"
+V(dolphin)$color = "white"
+V(dolphin)[male]$color = "blue"
+V(dolphin)[female]$color = "pink"
+plot(dolphin, layout=coords, vertex.label=NA, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0.5, vertex.size = 5, vertex.label.cex = 0.2)
+```
+
+```{r}
+Num_clusters <- 2
+comm_karate = GirvanNewman(karate)
+comm_walk_karate = Walktrap(karate)
+comm_eigen_karate = LeadingEigen(karate)
+comm_infomap_karate = Infomap(karate)
+par(mfrow=c(1,1))
+plotGraph(karate, comm_karate, Num_clusters)
+plotGraph(karate, comm_walk_karate, Num_clusters)
+plotGraph(karate, comm_eigen_karate, Num_clusters)
+#plotGraph(karate, comm_infomap_karate, Num_clusters)
+plot(comm_infomap_karate, karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)
+```
+

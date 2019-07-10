@@ -1,0 +1,2 @@
+"0","#plotGraph(karate, comm_infomap_karate, Num_clusters)"
+"0","plot(comm_infomap_karate, karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)"

@@ -1,0 +1,4 @@
+"0","evaluate_graph(karate, community = comm_infomap_karate, V_attr = 'Faction', num_comm = Num_clusters)"
+"2","Error in cutat(community, num_comm) : 
+  Not a hierarchical communitity structure
+"

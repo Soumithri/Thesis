@@ -1,0 +1,3 @@
+"0","V(G2)$degree = degree(G2, normalized = FALSE)"
+"0","L = layout_with_fr(G2)"
+"0","plot(G2, layout=layout.fruchterman.reingold, rescale=T, edge.arrow.size=.1, vertex.color=""red"", vertex.label.color=NA, vertex.label.dist=NA, asp = 0, vertex.size = 2, vertex.label.cex = 0.8)"
