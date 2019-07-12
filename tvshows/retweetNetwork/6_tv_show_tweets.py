@@ -25,7 +25,7 @@ LOG_FILE = LOG_FILE
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s %(message)s')
 
 
-if __name__ == "__main__":
+def main():
     # Start the timer
     start_time = timeit.default_timer()
     network = TweetsNetwork(TV_SHOW, DB_NAME)
@@ -41,3 +41,7 @@ if __name__ == "__main__":
     end_time = timeit.default_timer()
     total_time = (end_time-start_time)/60
     logging.info("----> Total program time taken: {0} mins".format(total_time))
+
+
+if __name__ == "__main__":
+    main()

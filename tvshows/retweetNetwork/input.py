@@ -1,4 +1,4 @@
-TV_SHOW = 'Gotham'
+TV_SHOW = 'SelfieABC'
 DB_NAME = 'swati_dataset'
 DB_COLL = TV_SHOW
 NODE_GRAPH = './output/'+TV_SHOW+'.graphml'
