@@ -1,0 +1,6 @@
+TV_SHOW = 'Blackish'
+OUT_DIR = '../output/'
+GAMMA = 0.2
+TOLERANCE = 1e-16
+ITERATIONS = 10000
+NUM_TOPICS = 10
