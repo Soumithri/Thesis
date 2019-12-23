@@ -8,10 +8,10 @@ from datetime import datetime
 MONGO_HOST= 'mongodb://localhost' 
 WORDS = ['']
 
-CONSUMER_KEY = "wDO81dOccJlOoH2oWdKm93oIl"
-CONSUMER_SECRET = "0ilDay6vQt97xfQCzzWQSqv9gySJ0tr5IQ7RrdMRn3Mr5cwOl7"
-ACCESS_TOKEN = "835305759734837249-KkeNBDmOsrZ26eSGMhl64D2y90k8VWl"
-ACCESS_TOKEN_SECRET = "US0AmH5VGEM6702lLiv2XSY17X6LgWso34Frvwjo0G6Ik"
+CONSUMER_KEY = ""
+CONSUMER_SECRET = ""
+ACCESS_TOKEN = ""
+ACCESS_TOKEN_SECRET = ""
 
 log_file = 'streaming_collection.log'
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s %(message)s')
