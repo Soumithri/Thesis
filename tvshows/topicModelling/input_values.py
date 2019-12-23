@@ -1,4 +1,4 @@
-TV_SHOW = 'Gotham'
+TV_SHOW = 'old_tweets'
 LOG_FILE = './output/' + TV_SHOW + '_lda.log'
 OUT_DIR = './output/'
 OUT_FILE = OUT_DIR + TV_SHOW

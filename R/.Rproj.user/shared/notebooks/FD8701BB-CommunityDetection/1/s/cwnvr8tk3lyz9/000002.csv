@@ -1,1 +1,0 @@
-"0","plot(comm, G2, layout=layout.fruchterman.reingold, rescale=T, edge.arrow.size=.1, vertex.label.color=NA, vertex.label.dist=NA, asp = -20, vertex.size = 2, vertex.label.cex = 0.8) "

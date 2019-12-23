@@ -1,5 +1,0 @@
-"0","comm <- cluster_edge_betweenness(G2.sym, weights=NULL, directed=T) "
-"0","cat('Number of identified communities: ', length(comm))"
-"1","Number of identified communities: "
-"1"," "
-"1","54"

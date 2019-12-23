@@ -1,6 +1,0 @@
-"0","male = V(dolphin)$sex == ""M"""
-"0","female = V(dolphin)$sex == ""F"""
-"0","V(dolphin)$color = ""white"""
-"0","V(dolphin)[male]$color = ""blue"""
-"0","V(dolphin)[female]$color = ""pink"""
-"0","plot(dolphin, layout=coords, vertex.label=NA, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0.5, vertex.size = 5, vertex.label.cex = 0.2)"

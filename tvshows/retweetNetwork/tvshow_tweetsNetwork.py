@@ -35,12 +35,12 @@ class TweetsNetwork:
     TOP100_USERS = './top100users.csv'
     BOT100_USERS = './bot100users.csv'
 
-    def __init__(self, show, DB_NAME):
+    def __init__(self, show, coll, DB_NAME):
         logging.basicConfig(filename= show + ".log", level=logging.INFO, format='%(asctime)s %(message)s')
         logging.info("starting...")
         self.network = nx.DiGraph()
         self.db = MongoClient()[DB_NAME]
-        self.coll = self.db[show]
+        self.coll = self.db[coll]
         #print(self.coll.find_one())
         self.show = show
         self.PATTERN = "^" + show
