@@ -1,4 +1,4 @@
-TV_SHOW = 'old_tweets'
+TV_SHOW = 'YouNetflix_new'
 LOG_FILE = './output/' + TV_SHOW + '_lda.log'
 OUT_DIR = './output/'
 OUT_FILE = OUT_DIR + TV_SHOW

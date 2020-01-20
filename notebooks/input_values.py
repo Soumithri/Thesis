@@ -1,16 +1,16 @@
-TV_SHOW = 'StrangerThings'
-OUT_DIR = '../tvshows/output/'
-GAMMA = 0.2
-TOLERANCE = 1e-6
-ITERATIONS = 100
-NUM_TOPICS = 10
-PRE_PROCESSED_FILE_NAME = 'StrangerThings'
-LDA_FILE_NAME = 'StrangerThings'
-GRAPHML_FILE = 'StrangerThings.graphml'
-TOPIC_VEC_FILE = 'StrangerThings_topic_frame.csv'
-TWITTER_RANK_FILE = 'StrangerThings_topic_rank_frame.csv'
-GRAPH_NODE_FILE = 'StrangerThings_graph_nodes_with_no_isolated_nodes.csv'
-NUM_OF_INFLUENTIAL_NODES = 20
+# TV_SHOW = 'StrangerThings'
+# OUT_DIR = '../tvshows/output/'
+# GAMMA = 0.2
+# TOLERANCE = 1e-6
+# ITERATIONS = 100
+# NUM_TOPICS = 10
+# PRE_PROCESSED_FILE_NAME = 'StrangerThings'
+# LDA_FILE_NAME = 'StrangerThings'
+# GRAPHML_FILE = 'StrangerThings.graphml'
+# TOPIC_VEC_FILE = 'StrangerThings_topic_frame.csv'
+# TWITTER_RANK_FILE = 'StrangerThings_topic_rank_frame.csv'
+# GRAPH_NODE_FILE = 'StrangerThings_graph_nodes_with_no_isolated_nodes.csv'
+# NUM_OF_INFLUENTIAL_NODES = 20
 
 
 # TV_SHOW = 'ThisIsUS'
@@ -42,3 +42,32 @@ NUM_OF_INFLUENTIAL_NODES = 20
 # GRAPH_NODE_FILE = 'TheGoodPlace_graph_nodes_with_no_isolated_nodes.csv'
 # LDA_FILE_NAME = 'old_tweets'
 # NUM_OF_INFLUENTIAL_NODES = 10
+
+# TV_SHOW = 'YouNetflix'
+# OUT_DIR = '../tvshows/output/'
+# GAMMA = 0.2
+# TOLERANCE = 1e-6
+# ITERATIONS = 100
+# NUM_TOPICS = 10
+# PRE_PROCESSED_FILE_NAME = 'YouNetflix'
+# LDA_FILE_NAME = 'YouNetflix'
+# GRAPHML_FILE = OUT_DIR + 'YouNetflix.graphml'
+# TOPIC_VEC_FILE = 'YouNetflix_topic_frame.csv'
+# TWITTER_RANK_FILE = 'YouNetflix_topic_rank_frame.csv'
+# GRAPH_NODE_FILE = 'YouNetflix_graph_nodes_with_no_isolated_nodes.csv'
+# NUM_OF_INFLUENTIAL_NODES = 20
+
+
+TV_SHOW = 'YouNetflix_new'
+OUT_DIR = '../tvshows/output/'
+GAMMA = 0.2
+TOLERANCE = 1e-6
+ITERATIONS = 100
+NUM_TOPICS = 10
+PRE_PROCESSED_FILE_NAME = 'YouNetflix_new'
+LDA_FILE_NAME = 'YouNetflix_new'
+GRAPHML_FILE = OUT_DIR + 'YouNetflix_new.graphml'
+TOPIC_VEC_FILE = 'YouNetflix_new_topic_frame.csv'
+TWITTER_RANK_FILE = 'YouNetflix_new_topic_rank_frame.csv'
+GRAPH_NODE_FILE = 'YouNetflix_new_graph_nodes_with_no_isolated_nodes.csv'
+NUM_OF_INFLUENTIAL_NODES = 20

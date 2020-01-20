@@ -16,10 +16,12 @@ from PyContract import PyContract
 from pymongo import MongoClient
 
 OUTPUT_DIRECTORY = './output'
-TV_SHOW = 'historical_tweets2'
-DB_NAME = 'tweetCorpus'
-config = {  'MONGO_COLL': TV_SHOW,
-            'MONGO_DB': 'swati_dataset',
+TV_SHOW = 'YouNetflix_new'
+STREAMING_COLL = 'streaming_coll'
+HISTORICAL_COLL = 'historical_coll'
+DB_NAME = 'tvshow_tweets'
+config = {  'MONGO_COLL': 'historical_coll',
+            'MONGO_DB': 'tvshow_tweets',
             'MONGO_HOST': 'localhost',
             'MONGO_PORT': 27017}
 
@@ -51,7 +53,7 @@ def get_Tweets(user:str) -> list:
     '''
     # Create new mongo collection and cursor object to store the unprocessed raw feature corpus
     #cursor = dbconnector.__connect__()
-    cursor = db_obj[TV_SHOW]
+    cursor = db_obj[HISTORICAL_COLL]
     # Collect all the user tweets as one document and store it in a list
     que = cursor.find({'user.id_str':user, 'lang':'en'}, {'_id':0, 'text':1})
     if que.count() < 10:
@@ -114,7 +116,7 @@ def get_wordnet_pos(treebank_tag):
         return None
 
 def get_users():
-    cursor = db_obj[TV_SHOW]
+    cursor = db_obj[HISTORICAL_COLL]
     # Collect all the user tweets as one document and store it in a list
     que = cursor.distinct('user.id_str')
     unique_users_list = list(que)

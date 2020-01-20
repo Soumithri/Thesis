@@ -14,6 +14,7 @@ import networkx as nx
 import logging
 from .Tweet import TweetType, Tweet
 from .input import NODE_GRAPH
+import pdb
 
 
 class TweetsNetwork:
@@ -53,8 +54,9 @@ class TweetsNetwork:
             #print(self.network.node[user_id])
         else:
             #print('already_present')
-            if create_time < self.network.node[user_id][self.USER_CREATE_TIME]:
-                self.network.node[user_id][self.USER_CREATE_TIME] = create_time
+            if create_time and self.network.node[user_id][self.USER_CREATE_TIME]:
+                if create_time < self.network.node[user_id][self.USER_CREATE_TIME]:
+                    self.network.node[user_id][self.USER_CREATE_TIME] = create_time
             #print('adjusted...')
 
     def get_tweet_type_count(self, tweet_type):
@@ -94,14 +96,13 @@ class TweetsNetwork:
 
     def add_retweet_edge(self, tweet):
         if tweet.retweet_author_id not in self.network:
-            #self.add_user(tweet.retweet_author_id, create_time = tweet.retweet_create_time)
-            #logging.info('Added retweeted author id: {} to the network'.format(tweet.retweet_author_id))
-            return
+            self.add_user(tweet.retweet_author_id, create_time = tweet.retweet_create_time)
         self.add_edge(tweet.author_id, tweet.retweet_author_id, TweetType.RETWEET, tweet.create_time)
         logging.info('added retweet edge...')
 
     def add_quote_edge(self, tweet):
         if tweet.quote_author_id not in self.network:
+            self.add_user(tweet.quote_author_id, create_time = -1)
             return
         self.add_edge(tweet.author_id, tweet.quote_author_id, TweetType.QUOTE, tweet.create_time)
 
@@ -110,13 +111,13 @@ class TweetsNetwork:
             if (tweet.retweet and mentioned_user in tweet.retweet_mentions) or \
                     (tweet.quote and mentioned_user in tweet.quote_mentions) or \
                     mentioned_user not in self.network:
-                continue
-
-
-            self.add_edge(tweet.author_id, mentioned_user, TweetType.MENTION, tweet.create_time)
+                self.add_user(int(mentioned_user), create_time = -1)
+                return
+            self.add_edge(tweet.author_id, int(mentioned_user), TweetType.MENTION, tweet.create_time)
 
     def add_reply_edge(self, tweet):
         if tweet.reply_id not in self.network:
+            self.add_user(tweet.reply_id, create_time = -1)
             return
         self.add_edge(tweet.author_id, tweet.reply_id, TweetType.REPLY, tweet.create_time)
 
@@ -165,11 +166,11 @@ class TweetsNetwork:
         assert show_name != '', "Hashtag shouldn't be empty!"
 
         # Added tweet author to network
-        query_string = {
-                        'entities.hashtags.text':{'$regex': self.PATTERN, '$options': 'i'}
-                       }
-        logging.info('\nQuery Tweets Begin\nQuery string is ' + str(query_string))
-        for t in self.coll.find(query_string).batch_size(TweetsNetwork.BATCH_SIZE):
+        # query_string = {
+        #                 'entities.hashtags.text':{'$regex': self.PATTERN, '$options': 'i'}
+        #                }
+        #logging.info('\nQuery Tweets Begin\nQuery string is ' + str(query_string))
+        for t in self.coll.find().batch_size(TweetsNetwork.BATCH_SIZE):
             #print(t['id_str'])
             tweet = Tweet(t)
             self.add_user(tweet.author_id, tweet.create_time)
@@ -180,7 +181,8 @@ class TweetsNetwork:
 
         # Added historical tweets
         count = 0
-        for author_id in self.network.nodes():
+        network_nodes = set(self.network.nodes())
+        for author_id in network_nodes:
             query_string = {"user.id": author_id}
             for t in self.coll.find(query_string).batch_size(TweetsNetwork.BATCH_SIZE):
                 self.add_tweet(Tweet(t))
