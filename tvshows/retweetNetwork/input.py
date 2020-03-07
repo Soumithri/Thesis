@@ -1,5 +1,15 @@
-TV_SHOW = 'SelfieABC'
-DB_NAME = 'swati_dataset'
-DB_COLL = TV_SHOW
+# TV_SHOW = 'StrangerThings'
+# DB_NAME = 'tweetCorpus'
+# STREAM_COLL = 'stream_tweets'
+# HIST_COLL = 'historical_tweets2'
+# NODE_GRAPH = './output/'+TV_SHOW+'.graphml'
+# LOG_FILE = './output/'+TV_SHOW+'_retweetNetwork.log'
+# DATA = 'HISTORICAL_DATA'
+
+TV_SHOW = 'YouNetflix_100'
+DB_NAME = 'tvshow_tweets'
+STREAM_COLL = 'streaming_coll_100'
+HIST_COLL = 'historical_coll_100'
 NODE_GRAPH = './output/'+TV_SHOW+'.graphml'
 LOG_FILE = './output/'+TV_SHOW+'_retweetNetwork.log'
+DATA = 'STREAM_DATA'

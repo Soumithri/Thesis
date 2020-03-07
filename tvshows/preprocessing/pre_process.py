@@ -11,15 +11,21 @@ from nltk.corpus import stopwords
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 #import custom libraries
-from MongoConnector import MongoConnector
+#from MongoConnector import MongoConnector
 from PyContract import PyContract
+from pymongo import MongoClient
 
 OUTPUT_DIRECTORY = './output'
-TV_SHOW = 'SelfieABC'
-config = {  'MONGO_COLL': TV_SHOW,
-            'MONGO_DB': 'swati_dataset',
+TV_SHOW = 'YouNetflix_100'
+STREAMING_COLL = 'streaming_coll_100'
+HISTORICAL_COLL = 'historical_coll_100'
+DB_NAME = 'tvshow_tweets'
+config = {  'MONGO_COLL': 'historical_coll',
+            'MONGO_DB': 'tvshow_tweets',
             'MONGO_HOST': 'localhost',
             'MONGO_PORT': 27017}
+
+client = MongoClient()
 
 customWords = ['bc', 'http', 'https', 'co', 'com','rt', 'one', 'us', 'new', 
               'lol', 'may', 'get', 'want', 'like', 'love', 'no', 'thank', 'would', 'thanks',
@@ -28,7 +34,8 @@ alphabets = list(map(chr, range(97, 123)))
 myStopWords = set(stopwords.words('english') + list(punctuation) + customWords + alphabets)
 
 # Initialize dbconnector, contracters, tokenizers, lemmatizers
-dbconnector = MongoConnector(config)
+#dbconnector = MongoConnector(config)
+db_obj = client[DB_NAME]
 contracter = PyContract()
 tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
 lemmatizer = WordNetLemmatizer()
@@ -45,7 +52,8 @@ def get_Tweets(user:str) -> list:
         Output: {'user_id' : [tweet_list]}
     '''
     # Create new mongo collection and cursor object to store the unprocessed raw feature corpus
-    cursor = dbconnector.__connect__()
+    #cursor = dbconnector.__connect__()
+    cursor = db_obj[HISTORICAL_COLL]
     # Collect all the user tweets as one document and store it in a list
     que = cursor.find({'user.id_str':user, 'lang':'en'}, {'_id':0, 'text':1})
     if que.count() < 10:
@@ -108,7 +116,7 @@ def get_wordnet_pos(treebank_tag):
         return None
 
 def get_users():
-    cursor = dbconnector.__connect__()
+    cursor = db_obj[HISTORICAL_COLL]
     # Collect all the user tweets as one document and store it in a list
     que = cursor.distinct('user.id_str')
     unique_users_list = list(que)

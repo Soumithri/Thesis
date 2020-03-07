@@ -85,7 +85,6 @@ Evaluation metrics using Zachary's Karate Club:
 #### FUNCTIONS ###################
 
 GirvanNewman <- function(G) {
-  #G = as.undirected(G2, mode= "collapse", edge.attr.comb=list(weight="sum", "ignore"))
   community <- cluster_fast_greedy(G, weights=NULL)
   cat('Number of identified communities: ', length(community))
   return (community)
@@ -155,16 +154,20 @@ plot(karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex
 
 ```{r}
 Num_clusters <- 2
-comm_karate = GirvanNewman(karate)
-comm_walk_karate = Walktrap(karate)
-comm_eigen_karate = LeadingEigen(karate)
-comm_infomap_karate = Infomap(karate)
+G = as.undirected(G2, mode= "collapse", edge.attr.comb=list(weight="sum", "ignore"))
+comm_karate = GirvanNewman(G)
+comm_walk_karate = Walktrap(G)
+comm_eigen_karate = LeadingEigen(G)
+comm_infomap_karate = Infomap(G)
 par(mfrow=c(1,1))
 plotGraph(karate, comm_karate, Num_clusters)
 plotGraph(karate, comm_walk_karate, Num_clusters)
 plotGraph(karate, comm_eigen_karate, Num_clusters)
 #plotGraph(karate, comm_infomap_karate, Num_clusters)
 plot(comm_infomap_karate, karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex.size = 12, vertex.label.cex = 0.8)
+```
+```{r}
+
 ```
 
 Plot the dynamic visualization

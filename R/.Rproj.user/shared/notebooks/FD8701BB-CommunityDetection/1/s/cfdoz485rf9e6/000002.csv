@@ -1,1 +1,0 @@
-"0","G2.sym = as.undirected(G2, mode= ""collapse"", edge.attr.comb=list(weight=""sum"", ""ignore""))"
