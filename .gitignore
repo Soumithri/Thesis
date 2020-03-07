@@ -145,3 +145,6 @@ Twitter-keys.txt
 # RStudio files
 .Rproj.user/
 .Rproj.user
+
+# don't ignore this file
+!measurements/*
