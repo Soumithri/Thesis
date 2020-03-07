@@ -6,10 +6,10 @@
 # LOG_FILE = './output/'+TV_SHOW+'_retweetNetwork.log'
 # DATA = 'HISTORICAL_DATA'
 
-TV_SHOW = 'YouNetflix_new'
+TV_SHOW = 'YouNetflix_100'
 DB_NAME = 'tvshow_tweets'
-STREAM_COLL = 'streaming_coll'
-HIST_COLL = 'historical_coll'
+STREAM_COLL = 'streaming_coll_100'
+HIST_COLL = 'historical_coll_100'
 NODE_GRAPH = './output/'+TV_SHOW+'.graphml'
 LOG_FILE = './output/'+TV_SHOW+'_retweetNetwork.log'
 DATA = 'STREAM_DATA'

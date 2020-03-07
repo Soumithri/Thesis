@@ -16,9 +16,9 @@ from PyContract import PyContract
 from pymongo import MongoClient
 
 OUTPUT_DIRECTORY = './output'
-TV_SHOW = 'YouNetflix_new'
-STREAMING_COLL = 'streaming_coll'
-HISTORICAL_COLL = 'historical_coll'
+TV_SHOW = 'YouNetflix_100'
+STREAMING_COLL = 'streaming_coll_100'
+HISTORICAL_COLL = 'historical_coll_100'
 DB_NAME = 'tvshow_tweets'
 config = {  'MONGO_COLL': 'historical_coll',
             'MONGO_DB': 'tvshow_tweets',

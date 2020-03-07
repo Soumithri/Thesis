@@ -115,6 +115,7 @@ output
 clear/
 
 # Files
+tvshows/collection/private.py
 Twitter-keys.txt
 *.out
 *.graphml

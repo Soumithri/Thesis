@@ -1,4 +1,4 @@
-TV_SHOW = 'YouNetflix_new'
+TV_SHOW = 'YouNetflix_100'
 LOG_FILE = './output/' + TV_SHOW + '_lda.log'
 OUT_DIR = './output/'
 OUT_FILE = OUT_DIR + TV_SHOW
