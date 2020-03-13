@@ -13,7 +13,7 @@ library(c2c)
 
 Load the GraphML file as an IGRAPH
 ```{r}
-G = read.graph('StrangerThings.graphml', format='graphml')
+G = read.graph('/Users/soumithri/Desktop/Projects/Thesis/notebooks/YouNetflix_1000.graphml', format='graphml')
 cat('Number of nodes in graph: ', length(V(G)),'\n')
 cat('Number of edges in graph: ', length(E(G)))
 ```
@@ -156,6 +156,9 @@ plot(karate, rescale=T, edge.arrow.size=0.1, vertex.label.dist=0, asp =0, vertex
 Num_clusters <- 2
 G = as.undirected(G2, mode= "collapse", edge.attr.comb=list(weight="sum", "ignore"))
 comm_karate = GirvanNewman(G)
+```
+
+```{r}
 comm_walk_karate = Walktrap(G)
 comm_eigen_karate = LeadingEigen(G)
 comm_infomap_karate = Infomap(G)

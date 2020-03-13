@@ -73,7 +73,7 @@
 # NUM_OF_INFLUENTIAL_NODES = 20
 
 
-TV_SHOW = 'YouNetflix_1000'
+TV_SHOW = 'YouNetflix_100'
 OUT_DIR = '../tvshows/output/'
 GAMMA = 0.2
 TOLERANCE = 1e-6
